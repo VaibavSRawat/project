@@ -2,11 +2,12 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<pthread.h>
+static int buff;
 void *producer();
 void *consumer();
 int main()
 {
-int a,buff=0;
+int a;
 pthread_mutex_t m1;
 char ch;
 pthread_mutex_init(&m1,NULL);
@@ -20,10 +21,14 @@ scanf("%d",&a);
 if(a==1)
 {
 pthread_create(&pro,NULL,producer,NULL);
+  pthread_join(pro,NULL);
 }
 else if(a==2)
 {
 pthread_create(&con,NULL,consumer,NULL);
+  
+ 
+pthread_join(con,NULL);
 }
 else
 {
@@ -34,13 +39,12 @@ scanf("%c",&ch);
 }
 }
 while(ch=='y'|ch=='Y');
-pthread_join(pro,NULL);
-pthread_join(con,NULL);
+
 }
 void *producer()
 {
 pthread_mutex_lock(&m1);
-sleep(1);
+//sleep(1);
 printf("\nlock aquired by the producer and now producing");
 buff++;
 printf("Producer produced item and buffer size is: %d",buff);
@@ -50,7 +54,7 @@ pthread_mutex_unlock(&m1);
 void *consumer()
 {
 pthread_mutex_lock(&m1);
-sleep(1);
+//sleep(1);
 printf("\nlock aquired by the consumer and now consuming");
 buff--;
 printf("Consumer consumed an item and remainng buffer size is: %d",buff);
