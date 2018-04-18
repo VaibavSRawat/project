@@ -78,7 +78,7 @@ void *con()
 }
 void main()
 {
-ppthread_t p1,c2;
+pthread_t p1,c2;
 //thread declaration
 sem_init(&mutex,0,1);
 sem_init(&full,0,0);
