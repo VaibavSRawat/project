@@ -91,6 +91,7 @@ printf("\nEnter the production rate of Producer (production at a time) \n");
 scanf("%d",&pr);
 printf("Enter the consumption rate of Consumer (Consume at a time) \n");
 scanf("%d",&cr);
+	for(int i=0;;)
 	{
 	pthread_create(&p1,NULL,pro,NULL);
 	pthread_create(&c2,NULL,con,NULL);
