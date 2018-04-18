@@ -6,7 +6,7 @@
 #include<semaphore.h>
 sem_t mutex,empty,full;
 // we will declare three semaphore that we will use in the following code.
-static int buff=0;
+static int buff=0,pr,cr,bs;
 // this is the buffer that we will use.
 void *pro()
 	{
@@ -19,13 +19,16 @@ void *pro()
 		sem_wait(&mutex);
 		// this will decrement the value of mutex. As it is initialized with 1 will go to 0.          
 		//After that no other process will be able to enter as it cannot go beyond 0.
-		if(buff<10)
+		if(bs>=(buff+pr))
 			{
-			buff++;
-			printf("\nProducer produce item and buffer size now is %d",buff);
+			buff+=pr;
+			printf("\nProducer produced %d item and buffer size now is %d",pr,buff);
 			}
-		else
+		else 
+			{
 			printf("\nBuffer is already full no space left to produce");
+			exit(0);
+			}
 			// there is no need to write else part here as sem(&empty) will be a infinite loop
 			// so it will never come out unless buffer is small than 10.
 		sem_post(&mutex);
@@ -49,13 +52,16 @@ void *con()
 		sem_wait(&mutex);
  		// this will decrement the value of mutex. As it is initialized with 1 will go to 0.          
 		//After that no other process will be able to enter as it cannot go beyond 0.
-		if(buff!=0)
+		if((buff-cr)>=0)
 			{
-			buff--;
-			printf("\nConsumer consumed item remaining item %d",buff);
+			buff-=cr;
+			printf("\nConsumer consumed %d item remaining buffer size is %d",cr,buff);
 			}
-		else if(buff==0)
-			printf("\nbuffer is empty nothing to consume");
+		else
+			{
+			printf("\nbuffer has not enough item to consume");
+						
+			}
 			// there is no need to write else part here as sem(&full) will be a infinite 
 			//loop unless there is something in the buffer.
 
@@ -72,18 +78,24 @@ void *con()
 }
 void main()
 {
-pthread_t p1,c2;
-// thread declaration
-sem_init(&mutex,2,1);
-sem_init(&empty,2,10);
-sem_init(&full,2,0);
-//semaphore initilization
-for(int i=0;;)
+ppthread_t p1,c2;
+//thread declaration
+sem_init(&mutex,0,1);
+sem_init(&full,0,0);
+//semaphore intilisation
+printf("\nEnter the Buffer size\n");
+scanf("%d",&bs);
+sem_init(&empty,0,bs);
+//buffer size
+printf("\nEnter the production rate of Producer (production at a time) \n");
+scanf("%d",&pr);
+printf("Enter the consumption rate of Consumer (Consume at a time) \n");
+scanf("%d",&cr);
 	{
 	pthread_create(&p1,NULL,pro,NULL);
 	pthread_create(&c2,NULL,con,NULL);
 	pthread_join(p1,NULL);
 	pthread_join(c2,NULL);
 	}
-//loop for creating and joining the thread.
+//thread mapping into main function
 }
