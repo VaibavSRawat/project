@@ -6,31 +6,34 @@
 #include<semaphore.h>
 sem_t mutex,empty,full;
 // we will declare three semaphore that we will use in the following code.
-static int buff=0,pr,cr,bs;
-// this is the buffer that we will use.
+static int i=0,buff[20],bs;
+// this is the buffer that we will use nad bs is for buffer size;
 void *pro()
 	{
 	//producer function
 	while(1)
 		{
+		if(i==bs)
+		{
+		printf("\nbuffer is full now exiting");
+		exit(0);//exit condition for the loop 
+		}
 		sem_wait(&empty);
 		//this will decrement the value of empty. As initially the buffer is empty so it is 
 		//initialized with 10 every time this command will run it will decrement the value
 		sem_wait(&mutex);
 		// this will decrement the value of mutex. As it is initialized with 1 will go to 0.          
 		//After that no other process will be able to enter as it cannot go beyond 0.
-		if(bs>=(buff+pr))
-			{
-			buff+=pr;
-			printf("\nProducer produced %d item and buffer size now is %d",pr,buff);
-			}
-		else 
-			{
-			printf("\nBuffer is already full no space left to produce");
-			exit(0);
-			}
-			// there is no need to write else part here as sem(&empty) will be a infinite loop
-			// so it will never come out unless buffer is small than 10.
+		buff[i]=rand()%100;
+		//this will generate a random number and will store in it buffer
+		printf("\nProducer produced item %d",buff[i]);
+                i++;
+		// this will show the random number that is genrated by the Producer thread and
+		// stored in the buffer
+		printf("\nItem in buffer after producing : ");
+		for(int y=0;y<i;y++)
+		printf("\t%d ",buff[y]);
+		// this will show all the elements in the buffer after producing the number
 		sem_post(&mutex);
 		// this will increment the value of mutex to 1. Resulting in the unlocking the 
 		//mutex for other processes.
@@ -52,19 +55,13 @@ void *con()
 		sem_wait(&mutex);
  		// this will decrement the value of mutex. As it is initialized with 1 will go to 0.          
 		//After that no other process will be able to enter as it cannot go beyond 0.
-		if((buff-cr)>=0)
-			{
-			buff-=cr;
-			printf("\nConsumer consumed %d item remaining buffer size is %d",cr,buff);
-			}
-		else
-			{
-			printf("\nbuffer has not enough item to consume");
-						
-			}
-			// there is no need to write else part here as sem(&full) will be a infinite 
-			//loop unless there is something in the buffer.
-
+		i--;
+		printf("\nThe consumer consumed %d",buff[i]);
+		// this will show the item consumed;
+		printf("\nRemaining elemnets in buffer are : "); 
+		// this loop will show the elements that remained after consuming 
+		for(int y=0;y<i;y++)
+		printf("\t%d",buff[y]);
 		sem_post(&mutex);
 		// this will increment the value of mutex to 1. Resulting in the unlocking 
 		//the mutex for other processes.
@@ -86,11 +83,7 @@ sem_init(&full,0,0);
 printf("\nEnter the Buffer size\n");
 scanf("%d",&bs);
 sem_init(&empty,0,bs);
-//buffer size
-printf("\nEnter the production rate of Producer (production at a time) \n");
-scanf("%d",&pr);
-printf("Enter the consumption rate of Consumer (Consume at a time) \n");
-scanf("%d",&cr);
+	//initializing empty semaphore with the buffer value
 	for(int i=0;;)
 	{
 	pthread_create(&p1,NULL,pro,NULL);
